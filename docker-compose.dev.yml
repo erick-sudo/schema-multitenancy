@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    build:
+      context: infrastructure_services/postgres
+      dockerfile: Dockerfile
+    container_name: dev_postgres_multitenant
+    environment:
+      POSTGRES_DB: db_multitenant
+      POSTGRES_USER: user_multitenant
+      POSTGRES_PASSWORD: password_multitenant
+    ports:
+      - '5433:5432'
+    # volumes:
+    #   - postgres-data:/var/lib/postgresql/data
+    networks:
+      - dev_multitenant_network
+
+networks:
+  dev_multitenant_network: {}
+# volumes:
+#   postgres-data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./infrastructure_services/db/postgres/data
