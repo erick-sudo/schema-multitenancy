@@ -1,10 +1,10 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TenantsModule } from './modules/public/tenants/tenants.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
 import { CatsModule } from './modules/tenanted/cats/cats.module';
-import { TenancyMiddleware } from './modules/tenancy/tenancy.middleware';
 import { publicDatasourceOptions } from './orm.config';
+import { PrismaModule } from './modules/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -12,12 +12,9 @@ import { publicDatasourceOptions } from './orm.config';
     TenantsModule,
     TenancyModule,
     CatsModule,
+    PrismaModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TenancyMiddleware);
-  }
-}
+export class AppModule {}

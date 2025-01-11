@@ -10,7 +10,7 @@ export const publicDatasourceOptions: DataSourceOptions = {
   password: 'password_multitenant',
   database: 'db_multitenant',
   namingStrategy: new SnakeNamingStrategy(),
-  logging: true,
+  // logging: true,
   synchronize: false,
   migrationsRun: false,
   entities: [join(__dirname, './modules/public/**/*.entity{.ts,.js}')],

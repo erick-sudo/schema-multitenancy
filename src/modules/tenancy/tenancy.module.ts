@@ -15,10 +15,8 @@ const connectionFactory = {
   useFactory: (request: ExpressRequest) => {
     const { tenantId } = request;
 
-    console.log('TenantId: ', tenantId);
-
     if (tenantId) {
-      return getTenantConnection(tenantId);
+      return getTenantConnection(tenantId.replaceAll('-', '_'));
     }
 
     throw new InternalServerErrorException();

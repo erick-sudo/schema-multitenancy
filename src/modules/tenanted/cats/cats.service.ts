@@ -3,13 +3,13 @@ import { CreateCatDto } from './dto/create-cat.dto';
 import { Connection, Repository } from 'typeorm';
 import { TENANT_CONNECTION } from 'src/modules/tenancy/tenancy.symbols';
 import { Cat } from './entities/cat.entity';
+import { UpdateCatDto } from './dto/update-cat.dto';
 
 @Injectable()
 export class CatsService {
   private readonly catsRepository: Repository<Cat>;
 
   constructor(@Inject(TENANT_CONNECTION) connection: Connection) {
-    console.log('TEST', connection.getRepository(Cat));
     this.catsRepository = connection.getRepository(Cat);
   }
 
@@ -20,18 +20,24 @@ export class CatsService {
   }
 
   findAll() {
-    return []; // this.catsRepository.find();
+    return this.catsRepository.find();
   }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} cat`;
-  // }
+  findOne(id: string) {
+    return this.findCat(id);
+  }
 
-  // update(id: number, updateCatDto: UpdateCatDto) {
-  //   return `This action updates a #${id} cat`;
-  // }
+  async update(catId: string, updateCatDto: UpdateCatDto & { id?: string }) {
+    await this.findCat(catId);
+    const { id, ...newUpdates } = updateCatDto;
+    return this.catsRepository.save(newUpdates);
+  }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} cat`;
-  // }
+  async remove(id: string) {
+    return this.catsRepository.remove(await this.findCat(id));
+  }
+
+  findCat(id: string) {
+    return this.catsRepository.findOneOrFail({ where: { id } });
+  }
 }

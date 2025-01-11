@@ -1,30 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTenantDto } from './dto/create-tenant.dto';
-import { getManager, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Tenant } from './entities/tenant.entity';
-import { getTenantConnection } from 'src/modules/tenancy/tenancy.utils';
 import { InjectRepository } from '@nestjs/typeorm';
+import { getTenantConnection } from 'src/modules/tenancy/tenancy.utils';
 
 @Injectable()
 export class TenantsService {
   constructor(
     @InjectRepository(Tenant)
     private readonly tenantsRepository: Repository<Tenant>,
+    private readonly dataSource: DataSource,
   ) {}
   async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
-    let tenant = new Tenant();
-    tenant.name = createTenantDto.name;
+    const tenant = await this.dataSource
+      .getRepository(Tenant)
+      .save(createTenantDto);
 
-    tenant = await this.tenantsRepository.save(tenant);
+    const sanitizedTenantId = tenant.id.replaceAll('-', '_').trim();
+    const schemaName = `tenant_${sanitizedTenantId}`;
 
-    const schemaName = `tenant_${tenant.id}`;
-    await getManager('public').query(
-      `CREATE SCHEMA IF NOT EXISTS ${schemaName}`,
-    );
+    const tenantConnection = await getTenantConnection(sanitizedTenantId);
 
-    const connection = await getTenantConnection(`${tenant.id}`);
-    await connection.runMigrations();
-    await connection.close();
+    await tenantConnection.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName}`);
+
+    await tenantConnection.runMigrations();
 
     return tenant;
   }
